@@ -20,6 +20,10 @@ abstract class ActorRef private[actors] (protected val actor: Actor) extends Dis
   }
 }
 
+object ActorSystem {
+  def apply(name: String) = new ActorSystem(name)
+}
+
 class ActorSystem(name: String) extends ChildrenManagement {
   def createActor(act: Actor): ActorRef = createChild(act)
 }
