@@ -6,4 +6,6 @@ package object actors {
 
   val Queue = scala.collection.mutable.Queue.empty[Any]
   type Queue[A] = scala.collection.mutable.Queue[A]
+
+  def randomLong = scala.util.Random.nextLong()
 }

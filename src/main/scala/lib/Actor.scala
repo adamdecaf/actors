@@ -9,6 +9,7 @@ object Actor {
 
 trait Actor extends ChildrenManagement {
   protected type Response = Actor.Response
+  final def id: Long = randomLong
 
   def name: String
   def response: Response
@@ -21,6 +22,8 @@ abstract class ActorRef private[actors] (protected val actor: Actor) extends Dis
   protected val mailbox = Queue
   actor.beforeStart()
   tick()
+
+  final def id: Long = actor.id
 
   def !(msg: Any): Unit = msg match {
     case StopActor =>
