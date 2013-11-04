@@ -1,5 +1,8 @@
 package actors
 
+case object RestartActor
+case object StopActor
+
 object Actor {
   type Response = PartialFunction[Any, Unit]
 }
@@ -9,14 +12,27 @@ trait Actor extends ChildrenManagement {
 
   def name: String
   def response: Response
+
+  def beforeStart(): Unit = {}
+  def beforeStop(): Unit = {}
 }
 
 abstract class ActorRef private[actors] (protected val actor: Actor) extends Dispatcher {
   protected val mailbox = Queue
+  actor.beforeStart()
   tick()
 
-  def !(msg: Any): Unit = {
-    mailbox.enqueue(msg)
+  def !(msg: Any): Unit = msg match {
+    case StopActor =>
+      actor.beforeStop()
+      shutdownDispatcher()
+
+    case RestartActor =>
+      actor.beforeStop()
+      mailbox.dequeueAll(_ => true)
+      actor.beforeStart()
+
+    case _ => mailbox.enqueue(msg)
   }
 }
 

@@ -3,10 +3,14 @@ package actors
 trait Dispatcher {
   protected def actor: Actor
   protected def mailbox: Queue[Any]
+  protected def shutdownDispatcher(): Unit
   protected def tick()(implicit exc: ExecutionContext): Unit
 }
 
 trait TimeBasedDispatcher extends Dispatcher with StoutLogging {
+  private[this] var running = true
+
+  protected def shutdownDispatcher() = (running = false)
 
   protected final def tick()(implicit exc: ExecutionContext): Unit = {
     exc.execute(new java.lang.Runnable {
@@ -18,7 +22,7 @@ trait TimeBasedDispatcher extends Dispatcher with StoutLogging {
             log.warn(s"Ignoring unhandled message ${msg}")
           }
         }
-        tick()
+        if (running) tick() // Stack overflow..
       }
     })
   }
